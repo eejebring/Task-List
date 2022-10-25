@@ -7,33 +7,30 @@
 
 import SwiftUI
 
-class Task: Identifiable{
+class Task: Identifiable, ObservableObject {
     var id = UUID()
     var name: String
     var complete = false
+    var categoryID: Int
     
     func toggle() { complete.toggle() }
     
-    init(name: String, complete: Bool = false) {
+    init(name: String, category: Int = 0, complete: Bool = false) {
         self.name = name
         self.complete = complete
+        self.categoryID = category
     }
 }
 
-
-
 struct ContentView: View {
+    var CATEGORIES = ["Uncategorized","Activities","Kitchen","Work"]
     @State var input = ""
-    @State var categories = [
-        "uncetegorized": [Task(name: "the stuff")],
-        "kitchen": [Task(name: "get ketchup")],
-        "Activites": [],
-        "School": []
-    ]
+    @State var allTasks = [Task(name: "the stuff")]
+    @State var selectedCategory = 0
     
-    func addTask (category: String){
+    func addTask (){
         if (input != "")  {
-            categories[category].append(Task(name: input))
+            allTasks.append(Task(name: input, category: selectedCategory))
             input = ""
         }
     }
@@ -43,24 +40,30 @@ struct ContentView: View {
     var body: some View {
         VStack {
             List {
-                ForEach (categories.keys.sorted(), id: \.self) { category in
-                    ForEach (categories[category]!) { task in
+                ForEach (allTasks) { task in
+                    if (selectedCategory == 0 || task.categoryID == selectedCategory) {
                         Button(action: task.toggle) {
                             HStack {
                                 Image(systemName: task.complete ? "checkmark.square" : "square")
                                 /*@START_MENU_TOKEN@*/Text(task.name)/*@END_MENU_TOKEN@*/
                             }
-                            Text(category)
+                            Text(CATEGORIES[task.categoryID])
                         }
                         .foregroundColor(task.complete ? .green : .black)
                         .swipeActions(edge: .trailing) {
                             Button ("Delete", action: {
-                                categories[category] = (categories[category] ?? []).filter({$0.id != task.id})
+                                allTasks = allTasks.filter({$0.id != task.id})
                             })
                         }
                     }
                 }
             }
+            Menu(CATEGORIES[selectedCategory]) {
+                ForEach (CATEGORIES.indices) { id in
+                    Button(CATEGORIES[id], action: {selectedCategory = id})
+                }
+            }
+            Divider()
             
             Button (action: {promptCreateTask = true}) {
                 HStack {
@@ -69,9 +72,8 @@ struct ContentView: View {
                 }
             }
             .alert( "Create task", isPresented: $promptCreateTask) {
-                var category = "School"
                 TextField("Task name", text: $input)
-                    .onSubmit ({addTask(category)})
+                    .onSubmit (addTask)
                 Button ("Create", action: addTask)
                 Button ("cancel", role: .cancel) {}
             }
