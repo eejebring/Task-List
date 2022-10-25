@@ -23,35 +23,42 @@ class Task: Identifiable{
 
 
 struct ContentView: View {
-    @State var allTasks = [
-        Task(name: "the thing")
-    ]
     @State var input = ""
+    @State var categories = [
+        "uncetegorized": [Task(name: "the stuff")],
+        "kitchen": [Task(name: "get ketchup")],
+        "Activites": [],
+        "School": []
+    ]
     
-    func addTask (){
-            if (input != "")  {
-                allTasks.append(Task(name: input))
-                input = ""
-            }
+    func addTask (category: String){
+        if (input != "")  {
+            categories[category].append(Task(name: input))
+            input = ""
+        }
     }
+    
     @State var promptCreateTask = false
     
     var body: some View {
         VStack {
-            Text("Task-List")
             List {
-                ForEach(allTasks) { task in
-                    Button(action: task.toggle) {
-                        HStack {
-                            Image(systemName: task.complete ? "checkmark.square" : "square")
-                            /*@START_MENU_TOKEN@*/Text(task.name)/*@END_MENU_TOKEN@*/
+                ForEach (categories.keys.sorted(), id: \.self) { category in
+                    ForEach (categories[category]!) { task in
+                        Button(action: task.toggle) {
+                            HStack {
+                                Image(systemName: task.complete ? "checkmark.square" : "square")
+                                /*@START_MENU_TOKEN@*/Text(task.name)/*@END_MENU_TOKEN@*/
+                            }
+                            Text(category)
                         }
-                    }.foregroundColor(task.complete ? .green : .black)
+                        .foregroundColor(task.complete ? .green : .black)
                         .swipeActions(edge: .trailing) {
                             Button ("Delete", action: {
-                                allTasks = allTasks.filter({$0.id != task.id})
+                                categories[category] = (categories[category] ?? []).filter({$0.id != task.id})
                             })
                         }
+                    }
                 }
             }
             
@@ -62,8 +69,9 @@ struct ContentView: View {
                 }
             }
             .alert( "Create task", isPresented: $promptCreateTask) {
+                var category = "School"
                 TextField("Task name", text: $input)
-                    .onSubmit (addTask)
+                    .onSubmit ({addTask(category)})
                 Button ("Create", action: addTask)
                 Button ("cancel", role: .cancel) {}
             }
