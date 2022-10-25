@@ -28,14 +28,20 @@ struct ContentView: View {
     ]
     @State var input = ""
     
+    func addTask (){
+            if (input != "")  {
+                allTasks.append(Task(name: input))
+                input = ""
+            }
+    }
+    @State var promptCreateTask = false
+    
     var body: some View {
         VStack {
             Text("Task-List")
             List {
                 ForEach(allTasks) { task in
-                    Button(action: {
-                        task.toggle()
-                    }) {
+                    Button(action: task.toggle) {
                         HStack {
                             Image(systemName: task.complete ? "checkmark.square" : "square")
                             /*@START_MENU_TOKEN@*/Text(task.name)/*@END_MENU_TOKEN@*/
@@ -44,27 +50,17 @@ struct ContentView: View {
                 }
             }
             
-            TextField(
-                    "Task name",
-                    text: $input
-                )
-                .onSubmit {
-                    if (input != "")  {
-                        allTasks.append(Task(name: input))
-                        input = ""
-                    }
-                }
-            Divider()
-            Button (action: {
-                if (input != "")  {
-                    allTasks.append(Task(name: input))
-                    input = ""
-                }
-            }) {
+            Button (action: {promptCreateTask = true}) {
                 HStack {
                     Image(systemName: "plus")
                     Text("new Task")
                 }
+            }
+            .alert( "Create task", isPresented: $promptCreateTask) {
+                TextField("Task name", text: $input)
+                    .onSubmit (addTask)
+                Button ("Create", action: addTask)
+                Button ("cancel", role: .cancel) {}
             }
         }
     }
