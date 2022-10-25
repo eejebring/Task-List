@@ -26,13 +26,14 @@ struct ContentView: View {
     @State var allTasks = [
         Task(name: "the thing")
     ]
+    @State var input = ""
     
     var body: some View {
         VStack {
+            Text("Task-List")
             List {
                 ForEach(allTasks) { task in
                     Button(action: {
-                        allTasks.append(Task(name: "new"))
                         task.toggle()
                     }) {
                         HStack {
@@ -40,6 +41,29 @@ struct ContentView: View {
                             /*@START_MENU_TOKEN@*/Text(task.name)/*@END_MENU_TOKEN@*/
                         }
                     }.foregroundColor(task.complete ? .green : .black)
+                }
+            }
+            
+            TextField(
+                    "Task name",
+                    text: $input
+                )
+                .onSubmit {
+                    if (input != "")  {
+                        allTasks.append(Task(name: input))
+                        input = ""
+                    }
+                }
+            Divider()
+            Button (action: {
+                if (input != "")  {
+                    allTasks.append(Task(name: input))
+                    input = ""
+                }
+            }) {
+                HStack {
+                    Image(systemName: "plus")
+                    Text("new Task")
                 }
             }
         }
