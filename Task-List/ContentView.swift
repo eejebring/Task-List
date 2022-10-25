@@ -47,6 +47,11 @@ struct ContentView: View {
                             /*@START_MENU_TOKEN@*/Text(task.name)/*@END_MENU_TOKEN@*/
                         }
                     }.foregroundColor(task.complete ? .green : .black)
+                        .swipeActions(edge: .trailing) {
+                            Button ("Delete", action: {
+                                allTasks = allTasks.filter({$0.id != task.id})
+                            })
+                        }
                 }
             }
             
