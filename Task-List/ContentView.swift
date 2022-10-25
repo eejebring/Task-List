@@ -7,16 +7,42 @@
 
 import SwiftUI
 
+class Task: Identifiable{
+    var id = UUID()
+    var name: String
+    var complete = false
+    
+    func toggle() { complete.toggle() }
+    
+    init(name: String, complete: Bool = false) {
+        self.name = name
+        self.complete = complete
+    }
+}
+
+
+
 struct ContentView: View {
+    @State var allTasks = [
+        Task(name: "the thing")
+    ]
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
-            
+            List {
+                ForEach(allTasks) { task in
+                    Button(action: {
+                        allTasks.append(Task(name: "new"))
+                        task.toggle()
+                    }) {
+                        HStack {
+                            Image(systemName: task.complete ? "checkmark.square" : "square")
+                            /*@START_MENU_TOKEN@*/Text(task.name)/*@END_MENU_TOKEN@*/
+                        }
+                    }.foregroundColor(task.complete ? .green : .black)
+                }
+            }
         }
-        .padding()
     }
 }
 
