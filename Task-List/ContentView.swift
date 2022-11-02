@@ -28,10 +28,12 @@ struct ContentView: View {
     @State var allTasks = [Task(name: "the stuff")]
     @State var selectedCategory = 0
     
-    func addTask (){
+    func addTask () {
         if (input != "")  {
-            allTasks.append(Task(name: input, category: selectedCategory))
-            input = ""
+            DispatchQueue.main.async {
+                allTasks.append(Task(name: input, category: selectedCategory))
+                input = ""
+            }
         }
     }
     
@@ -42,12 +44,20 @@ struct ContentView: View {
             List {
                 ForEach (allTasks) { task in
                     if (selectedCategory == 0 || task.categoryID == selectedCategory) {
-                        Button(action: task.toggle) {
+                        Button(action: {
+                            task.toggle()
+                            
+                            //is it really stupid, if it is stupid but it works?
+                            allTasks.append(Task(name:"not here"))
+                            allTasks.removeLast()
+                        }) {
                             HStack {
                                 Image(systemName: task.complete ? "checkmark.square" : "square")
                                 /*@START_MENU_TOKEN@*/Text(task.name)/*@END_MENU_TOKEN@*/
                             }
-                            Text(CATEGORIES[task.categoryID])
+                            HStack {
+                                Text(CATEGORIES[task.categoryID])
+                            }
                         }
                         .foregroundColor(task.complete ? .green : .black)
                         .swipeActions(edge: .trailing) {
